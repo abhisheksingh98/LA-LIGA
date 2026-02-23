@@ -10,25 +10,25 @@ import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
-import { firebasePlayers } from '../../../firebase';
+import { firebasePlayers, onValue } from '../../../firebase';
 import { firebaseLooper, reverseArray } from '../../ui/misc';
 
 class AdminPlayers extends Component {
 
     state = {
         isloading: true,
-        players:[]
+        players: []
     }
 
-    componentDidMount(){
-        firebasePlayers.once('value').then((snapshot)=>{
+    componentDidMount() {
+        const unsubscribe = onValue(firebasePlayers, (snapshot) => {
             const players = firebaseLooper(snapshot);
 
             this.setState({
                 isloading: false,
                 players: reverseArray(players)
             })
-
+            unsubscribe();
         })
     }
 
@@ -47,8 +47,8 @@ class AdminPlayers extends Component {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                { this.state.players ?
-                                    this.state.players.map((player,i)=>(
+                                {this.state.players ?
+                                    this.state.players.map((player, i) => (
                                         <TableRow key={i}>
                                             <TableCell>
                                                 <Link to={`/admin_players/add_players/${player.id}`}>
@@ -64,19 +64,19 @@ class AdminPlayers extends Component {
                                                 {player.number}
                                             </TableCell>
                                             <TableCell>
-                                                 {player.position}
+                                                {player.position}
                                             </TableCell>
                                         </TableRow>
                                     ))
-                                    :null
+                                    : null
                                 }
                             </TableBody>
                         </Table>
                     </Paper>
                     <div className="admin_progress">
-                        { this.state.isloading ?
-                            <CircularProgress thickness={7} style={{color:'#98c5e9'}}/>
-                            :''
+                        {this.state.isloading ?
+                            <CircularProgress thickness={7} style={{ color: '#98c5e9' }} />
+                            : ''
                         }
                     </div>
                 </div>

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { firebaseDB } from '../../firebase';
+import { firebaseDB, ref as dbRef, onValue } from '../../firebase';
 import { firebaseLooper } from '../ui/misc';
 
 import Table from '@material-ui/core/Table';
@@ -8,8 +8,8 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 
-const style ={
-    cell:{
+const style = {
+    cell: {
         padding: '4px 16px 4px 11px',
         borderBottom: '1px solid #ffffff',
         color: '#ffffff',
@@ -21,25 +21,27 @@ const style ={
 class LeagueTable extends Component {
 
     state = {
-        positions:[]
+        positions: []
     }
 
-    componentDidMount(){
-        firebaseDB.ref('positions').once('value').then((snapshot) => {
+    componentDidMount() {
+        const positionsRef = dbRef(firebaseDB, 'positions');
+        const unsubscribe = onValue(positionsRef, (snapshot) => {
             const positions = firebaseLooper(snapshot);
 
             this.setState({
                 positions: positions
             })
+            unsubscribe();
         })
     }
 
 
     showTeampositions = (pos) => (
         pos ?
-            pos.map((pos,i)=>(
+            pos.map((pos, i) => (
                 <TableRow key={i}>
-                    <TableCell style={style.cell}>{i+1}</TableCell>
+                    <TableCell style={style.cell}>{i + 1}</TableCell>
                     <TableCell style={style.cell}>{pos.team}</TableCell>
                     <TableCell numeric style={style.cell}>{pos.w}</TableCell>
                     <TableCell numeric style={style.cell}>{pos.d}</TableCell>
@@ -47,35 +49,35 @@ class LeagueTable extends Component {
                     <TableCell numeric style={style.cell}>{pos.pts}</TableCell>
                 </TableRow>
             ))
-            :null
+            : null
     )
 
-    
-   
+
+
 
     render() {
-        
+
         return (
             <div className="league_table_wrapper">
                 <div className="title">
                     League Table
                 </div>
-                <div style={{background: '#98c6e9'}}>
-                <Table>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell style={style.cell}>Pos</TableCell>
-                            <TableCell style={style.cell}>Team</TableCell>
-                            <TableCell style={style.cell}>W</TableCell>
-                            <TableCell style={style.cell}>L</TableCell>
-                            <TableCell style={style.cell}>D</TableCell>
-                            <TableCell style={style.cell}>Pts</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {this.showTeampositions(this.state.positions)}
-                    </TableBody>
-                </Table>
+                <div style={{ background: '#98c6e9' }}>
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell style={style.cell}>Pos</TableCell>
+                                <TableCell style={style.cell}>Team</TableCell>
+                                <TableCell style={style.cell}>W</TableCell>
+                                <TableCell style={style.cell}>L</TableCell>
+                                <TableCell style={style.cell}>D</TableCell>
+                                <TableCell style={style.cell}>Pts</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {this.showTeampositions(this.state.positions)}
+                        </TableBody>
+                    </Table>
                 </div>
             </div>
         )

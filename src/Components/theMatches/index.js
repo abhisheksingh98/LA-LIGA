@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import CircularProgress from '@material-ui/core/CircularProgress'
 
-import { firebaseMatches } from '../../firebase';
+import { firebaseMatches, onValue } from '../../firebase';
 import { firebaseLooper, reverseArray } from '../ui/misc';
 
 import LeagueTable from './table';
@@ -11,14 +11,14 @@ class TheMatches extends Component {
 
     state = {
         loading: true,
-        matches:[],
-        filterMatches:[],
-        playedFilter:'All',
-        resultFilter:'All'
+        matches: [],
+        filterMatches: [],
+        playedFilter: 'All',
+        resultFilter: 'All'
     }
 
-    componentDidMount(){
-        firebaseMatches.once('value').then(snapshot=>{
+    componentDidMount() {
+        const unsubscribe = onValue(firebaseMatches, snapshot => {
             const matches = firebaseLooper(snapshot);
 
             this.setState({
@@ -26,14 +26,15 @@ class TheMatches extends Component {
                 matches: reverseArray(matches),
                 filterMatches: reverseArray(matches)
             });
-        })
+            unsubscribe();
+        });
     }
 
     showPlayed = (played) => {
-        const list = this.state.matches.filter((match)=>{
+        const list = this.state.matches.filter((match) => {
             return match.final === played
         });
-        
+
         this.setState({
             filterMatches: played === 'All' ? this.state.matches : list,
             playedFilter: played,
@@ -42,10 +43,10 @@ class TheMatches extends Component {
     }
 
     showResult = (result) => {
-        const list = this.state.matches.filter((match)=>{
+        const list = this.state.matches.filter((match) => {
             return match.result === result
         });
-        
+
         this.setState({
             filterMatches: result === 'All' ? this.state.matches : list,
             playedFilter: 'All',
@@ -66,17 +67,17 @@ class TheMatches extends Component {
                                     Show Match
                                 </div>
                                 <div className="cont">
-                                    <div className={`option ${state.playedFilter === 'All'?'active':''}`}
-                                        onClick={()=> this.showPlayed('All')}
+                                    <div className={`option ${state.playedFilter === 'All' ? 'active' : ''}`}
+                                        onClick={() => this.showPlayed('All')}
                                     >
                                         All
                                     </div>
-                                    <div className={`option ${state.playedFilter === 'Yes'?'active':''}`}
-                                        onClick={()=> this.showPlayed('Yes')}>
+                                    <div className={`option ${state.playedFilter === 'Yes' ? 'active' : ''}`}
+                                        onClick={() => this.showPlayed('Yes')}>
                                         Played
                                     </div>
-                                    <div className={`option ${state.playedFilter === 'No'?'active':''}`}
-                                        onClick={()=> this.showPlayed('No')}>
+                                    <div className={`option ${state.playedFilter === 'No' ? 'active' : ''}`}
+                                        onClick={() => this.showPlayed('No')}>
                                         Not played
                                     </div>
                                 </div>
@@ -86,30 +87,30 @@ class TheMatches extends Component {
                                     Result game
                                 </div>
                                 <div className="cont">
-                                    <div className={`option ${state.resultFilter === 'All'?'active':''}`}
-                                        onClick={()=> this.showResult('All')}
+                                    <div className={`option ${state.resultFilter === 'All' ? 'active' : ''}`}
+                                        onClick={() => this.showResult('All')}
                                     >
                                         All
                                     </div>
-                                    <div className={`option ${state.resultFilter === 'W'?'active':''}`}
-                                        onClick={()=> this.showResult('W')}>
+                                    <div className={`option ${state.resultFilter === 'W' ? 'active' : ''}`}
+                                        onClick={() => this.showResult('W')}>
                                         W
                                     </div>
-                                    <div className={`option ${state.resultFilter === 'L'?'active':''}`}
-                                        onClick={()=> this.showResult('L')}>
+                                    <div className={`option ${state.resultFilter === 'L' ? 'active' : ''}`}
+                                        onClick={() => this.showResult('L')}>
                                         L
                                     </div>
-                                    <div className={`option ${state.resultFilter === 'D'?'active':''}`}
-                                        onClick={()=> this.showResult('D')}>
+                                    <div className={`option ${state.resultFilter === 'D' ? 'active' : ''}`}
+                                        onClick={() => this.showResult('D')}>
                                         D
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <MatchesList matches={state.filterMatches}/>
+                        <MatchesList matches={state.filterMatches} />
                     </div>
                     <div className="right">
-                        <LeagueTable/>
+                        <LeagueTable />
                     </div>
                 </div>
             </div>

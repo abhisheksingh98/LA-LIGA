@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { firebaseMatches } from '../../../firebase';
+import { firebaseMatches, query, limitToLast, onValue } from '../../../firebase';
 import { firebaseLooper, reverseArray } from '../../ui/misc';
 
 import MatchesBlock from '../../ui/matches_block';
@@ -8,32 +8,34 @@ import Slide from 'react-reveal/Slide'
 class Blocks extends Component {
 
     state = {
-        matches:[]
+        matches: []
     }
 
-    componentDidMount(){
-        firebaseMatches.limitToLast(6).once('value').then((snapshot)=>{
+    componentDidMount() {
+        const q = query(firebaseMatches, limitToLast(6));
+        const unsubscribe = onValue(q, (snapshot) => {
             const matches = firebaseLooper(snapshot);
 
             this.setState({
                 matches: reverseArray(matches)
             });
+            unsubscribe();
         })
     }
 
 
     showMatches = (matches) => (
         matches ?
-            matches.map((match)=>(
+            matches.map((match) => (
                 <Slide bottom key={match.id}>
                     <div className="item">
                         <div className="wrapper">
-                            <MatchesBlock match={match}/>
+                            <MatchesBlock match={match} />
                         </div>
                     </div>
                 </Slide>
             ))
-        :null
+            : null
     )
 
 
